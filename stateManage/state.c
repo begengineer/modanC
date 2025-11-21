@@ -1,9 +1,9 @@
 typedef struct {
-    void (*enter)(void);      // ① その状態に入った時に1回だけ実行
-    void (*update)(void);     // ② その状態の間、毎回実行（オプション）
-    void (*exit)(void);       // ③ その状態から出る時に1回だけ実行（オプション）
-    RobotState nextState;     // ④ 次に遷移する状態
-    uint32_t duration;        // ⑤ この状態を何ミリ秒続けるか
+    void (*enter)(void);
+    void (*update)(void);
+    void (*exit)(void);
+    RobotState nextState;
+    uint32_t duration;
 } StateData;
 
 // 状態の列挙
@@ -36,40 +36,36 @@ StateData stateTable[STATE_MAX] = {
     [STATE_INIT]    = {NULL,         NULL, NULL, STATE_FORWARD, 0},      // すぐ次へ
     [STATE_FORWARD] = {forwardEnter, NULL, NULL, STATE_TURN,    2000},   // 2秒後にSTATE_TURNへ
     [STATE_TURN]    = {turnEnter,    NULL, NULL, STATE_STOP,    1000},   // 1秒後にSTATE_STOPへ
-    [STATE_STOP]    = {stopEnter,    NULL, NULL, STATE_STOP,    0},      // 終了（自分自身に遷移）
+    [STATE_STOP]    = {stopEnter,    NULL, NULL, STATE_STOP,    0},      // 終了
 };
 
 RobotState currentState = STATE_INIT;  // 現在の状態
 uint32_t stateStartTime = 0;           // 状態が始まった時刻
 
 void updateStateMachine(void) {
-    // ① 現在の状態データを取得
     StateData *state = &stateTable[currentState];
     
-    // ② この状態に入ってからの経過時間を計算
     uint32_t elapsed = millis() - stateStartTime;
     
-    // ③ 指定時間が経過したか？
     if(state->duration > 0 && elapsed >= state->duration) {
         
         // --- 状態遷移が発生 ---
         
-        // ④ 現在の状態から出る処理（あれば）
         if(state->exit != NULL) {
             state->exit();
         }
         
-        // ⑤ 次の状態へ切り替え
+        // 次の状態へ切り替え
         currentState = state->nextState;
         stateStartTime = millis();  // 新しい状態の開始時刻を記録
         
-        // ⑥ 新しい状態に入る処理（あれば）
+        // 新しい状態に入る処理（あれば）
         if(stateTable[currentState].enter != NULL) {
             stateTable[currentState].enter();
         }
     }
     
-    // ⑦ 現在の状態の実行中処理（あれば）
+    // 現在の状態の実行中処理（あれば）
     if(state->update != NULL) {
         state->update();
     }
