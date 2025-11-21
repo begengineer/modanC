@@ -31,7 +31,6 @@ void stopEnter(void) {
     robotStop();
 }
 
-// ★状態テーブル：すべての状態の情報をまとめたもの
 StateData stateTable[STATE_MAX] = {
     // enter関数, update関数, exit関数, 次の状態, 持続時間
     [STATE_INIT]    = {NULL,         NULL, NULL, STATE_FORWARD, 0},      // すぐ次へ
