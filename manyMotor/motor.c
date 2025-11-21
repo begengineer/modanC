@@ -11,7 +11,7 @@ typedef struct{
     MTRState currntState;
 
     // 重要なのはここ。状態と関数を列挙体を用いて紐づけてあげる
-    void (*stateProcs[3])(struct MotorS *motor);
+    void (*stateProcs[3])(MotorS *motor);
 
     // 現在の速度
     uint8_t currntduty;
