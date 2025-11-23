@@ -1,1 +1,65 @@
+# ワークフロー名 - GitHubのActionsタブに表示されます
+name: C Build CI
 
+# トリガー条件: いつこのワークフローを実行するか
+on:
+  # pushされたときに実行
+  push:
+    branches:
+      - main           # mainブランチへのpush
+      - 'feature/**'   # feature/で始まるブランチへのpush
+
+  # Pull Requestが作成/更新されたときに実行
+  pull_request:
+    branches:
+      - main
+
+  # 手動実行も可能にする（GitHub UIから）
+  workflow_dispatch:
+
+# ジョブの定義
+jobs:
+  # ジョブ名: build
+  build:
+    # 実行環境: Ubuntu最新版のGitHubホストランナー
+    runs-on: ubuntu-latest
+
+    # このジョブで実行するステップ
+    steps:
+      # ステップ1: リポジトリのコードをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ステップ2: GCCがインストールされているか確認
+      - name: Check GCC version
+        run: gcc --version
+
+      # ステップ3: practiceMakefileディレクトリでビルド
+      - name: Build practiceMakefile
+        run: |
+          cd practiceMakefile
+          make
+
+      # ステップ4: ビルド成果物の確認
+      - name: Verify build output
+        run: |
+          ls -la practiceMakefile/bin/
+          # 実行ファイルが存在するか確認
+          test -f practiceMakefile/bin/myapp
+
+  # 別のジョブ: 静的解析（オプション）
+  static-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # cppcheckで静的解析
+      - name: Install cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run static analysis
+        run: |
+          cppcheck --enable=warning,style --error-exitcode=1 \
+            arrayProc/ inheritance/ manyMotor/ practiceMakefile/src/ stateManage/
